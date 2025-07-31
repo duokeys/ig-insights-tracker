@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IG Insights Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    input, textarea, select { width: 100%; padding: 6px; box-sizing: border-box; }
+    .section { margin-bottom: 40px; }
+    .highlight-red { background-color: #ffe5e5; }
+    .highlight-green { background-color: #e3fce3; }
+  </style>
+</head>
+<body>
+  <h1>IG Posts & Reels Insights Tracker</h1>
+
+  <div class="section">
+    <h2>1. 輸入內容資料</h2>
+    <form id="insightForm">
+      <table id="insightTable">
+        <tr>
+          <th>日期</th>
+          <th>類型</th>
+          <th>主題</th>
+          <th>創作目標</th>
+          <th>觀看數</th>
+          <th>過頭3秒觀眾 (%)</th>
+          <th>影片長度（秒）</th>
+          <th>平均觀看時間（秒）</th>
+          <th>平均觀看率 (%)</th>
+          <th>讚好</th>
+          <th>留言</th>
+          <th>分享</th>
+          <th>儲存</th>
+          <th>是否優秀案例</th>
+          <th>是否重發</th>
+          <th>成效總結</th>
+          <th>教練建議</th>
+          <th>再發策略</th>
+        </tr>
+        <tr>
+          <td><input type="date" name="date"></td>
+          <td>
+            <select name="type" onchange="handleTypeChange(this)">
+              <option value="Post">Post</option>
+              <option value="Reel">Reel</option>
+              <option value="Carousel">Carousel</option>
+            </select>
+          </td>
+          <td><input type="text" name="topic"></td>
+          <td><input type="text" name="goal"></td>
+          <td><input type="number" name="views"></td>
+          <td><input type="number" name="over3s"></td>
+          <td><input type="number" name="length" oninput="calculateRate(this)"></td>
+          <td><input type="number" name="avgSec" oninput="calculateRate(this)"></td>
+          <td><input type="number" name="avgView" readonly></td>
+          <td><input type="number" name="likes"></td>
+          <td><input type="number" name="comments"></td>
+          <td><input type="number" name="shares"></td>
+          <td><input type="number" name="saves"></td>
+          <td>
+            <select name="star">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </td>
+          <td>
+            <select name="reposted">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </td>
+          <td><textarea name="summary"></textarea></td>
+          <td><textarea name="coach"></textarea></td>
+          <td>
+            <select name="strategy">
+              <option value="改標題重發">改標題重發</option>
+              <option value="改頭三秒重發">改頭三秒重發</option>
+              <option value="直接重發">直接重發</option>
+              <option value="不再使用">不再使用</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <button type="submit">儲存資料</button>
+    </form>
+  </div>
+
+  <div class="section">
+    <h2>2. 功能建議與進階追蹤（開發中）</h2>
+    <ul>
+      <li>🔴 自動標示紅色：若過頭3秒 < 45 或 平均觀看 < 25%</li>
+      <li>🟢 自動標示綠色：若過頭3秒 ≥ 45 且 平均觀看 ≥ 25%</li>
+      <li>⭐️ 可勾選為優秀案例，便於重用</li>
+      <li>📅 顯示是否已重發，以及下一次安排時間</li>
+      <li>🔍 可篩選不同類型、主題、重發狀態</li>
+      <li>📊 自動統計每月表現平均、最佳貼文等</li>
+    </ul>
+  </div>
+
+  <script>
+    function calculateRate(el) {
+      const row = el.parentElement.parentElement;
+      const len = row.querySelector('input[name="length"]').value;
+      const avg = row.querySelector('input[name="avgSec"]').value;
+      const rateField = row.querySelector('input[name="avgView"]');
+      if (len > 0 && avg >= 0) {
+        const result = (avg / len * 100).toFixed(1);
+        rateField.value = result;
+        updateHighlight(row);
+      }
+    }
+
+    function updateHighlight(row) {
+      const over3s = parseFloat(row.querySelector('input[name="over3s"]').value || 0);
+      const avgView = parseFloat(row.querySelector('input[name="avgView"]').value || 0);
+      row.classList.remove('highlight-green', 'highlight-red');
+      if (over3s >= 45 && avgView >= 25) {
+        row.classList.add('highlight-green');
+      } else if (over3s < 45 || avgView < 25) {
+        row.classList.add('highlight-red');
+      }
+    }
+
+    function handleTypeChange(select) {
+      const row = select.parentElement.parentElement;
+      const type = select.value;
+      const lengthField = row.querySelector('input[name="length"]');
+      const avgSecField = row.querySelector('input[name="avgSec"]');
+      if (type === 'Reel') {
+        lengthField.disabled = false;
+        avgSecField.disabled = false;
+      } else {
+        lengthField.disabled = true;
+        avgSecField.disabled = true;
+        lengthField.value = '';
+        avgSecField.value = '';
+        row.querySelector('input[name="avgView"]').value = '';
+      }
+      updateHighlight(row);
+    }
+  </script>
+</body>
+</html>
